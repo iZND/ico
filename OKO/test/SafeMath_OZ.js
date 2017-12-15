@@ -98,18 +98,7 @@ contract('SafeMath', function(accounts) {
       assertJump(error);
     }
   });
-/* TODO I'll make it work and think test if a <0
-  it("should throw an error division -1", async function () {
-    let a = 1234;
-    let b = -1;
-    try {
-      let subtract = await safeMath.div(a, b);
-      assert.fail('should have thrown before');
-    } catch(error) {
-      assertJump(error);
-    }
-  });
-*/
+
 });
 
 

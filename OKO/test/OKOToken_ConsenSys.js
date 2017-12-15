@@ -1,34 +1,34 @@
 // Based on code by ConsenSys 
 // https://github.com/ConsenSys/Tokens/blob/master/test/humanStandardToken.js
-const VirtRealTokenTest = artifacts.require("./VirtRealToken.sol")
+const OKOTokenTest = artifacts.require("./OKOToken.sol")
 const expectThrow = require('./helpers/utils').expectThrow
 let HST
 
-contract('VirtRealToken', function (accounts) {
+contract('OKOToken', function (accounts) {
 
   beforeEach(async () => {
-    HST = await VirtRealTokenTest.new(accounts[1], accounts[0], {from: accounts[2]})
+    HST = await OKOTokenTest.new({from: accounts[0]})
   })
-  it('creation: should create an initial balance of 55*10^13 for the allTokenOnewr', async () => {
+  it('creation: should create an initial balance of 24*10^13 for the allTokenOnewr', async () => {
     const balance = await HST.balanceOf.call(accounts[0])
-    assert.strictEqual(balance.toNumber(), 550000000000000)
+    assert.strictEqual(balance.toNumber(), 240000000000000)
   })
   it('creation: test correct setting of vanity information', async () => {
     const name = await HST.name.call()
-    assert.strictEqual(name, 'Virtual Reality Token')
+    assert.strictEqual(name, 'OKOIN')
 
     const decimals = await HST.decimals.call()
     assert.strictEqual(decimals.toNumber(), 6)
 
     const symbol = await HST.symbol.call()
-    assert.strictEqual(symbol, 'VRT')
+    assert.strictEqual(symbol, 'OKO')
   })
   // TRANSERS
   // normal transfers without approvals
 
   it('transfers: ether transfer should be reversed.', async () => {
     const balanceBefore = await HST.balanceOf.call(accounts[0])
-    assert.strictEqual(balanceBefore.toNumber(), 550000000000000)
+    assert.strictEqual(balanceBefore.toNumber(), 240000000000000)
 
     web3.eth.sendTransaction({from: accounts[0], to: HST.address, value: web3.toWei('10', 'Ether')}, async (err, res) => {
       expectThrow(new Promise((resolve, reject) => {
@@ -37,18 +37,18 @@ contract('VirtRealToken', function (accounts) {
       }))
 
       const balanceAfter = await HST.balanceOf.call(accounts[0])
-      assert.strictEqual(balanceAfter.toNumber(), 550000000000000)
+      assert.strictEqual(balanceAfter.toNumber(), 240000000000000)
     })
   })
 
-  it('transfers: should fail when trying to transfer 55^13 +1 to accounts[1] with accounts[0] having 55^13', () => {
-    return expectThrow(HST.transfer.call(accounts[1], 550000000000001, {from: accounts[0]}))
+  it('transfers: should fail when trying to transfer 24*10^13 +1 to accounts[1] with accounts[0] having 24*10^13', () => {
+    return expectThrow(HST.transfer.call(accounts[1], 240000000000001, {from: accounts[0]}))
   })
 
-  it('transfers: should transfer 55^13 to accounts[1] with accounts[0] having 55^13', async () => {
-    await HST.transfer(accounts[1], 550000000000000, {from: accounts[0]})
+  it('transfers: should transfer 24*10^13 to accounts[1] with accounts[0] having 24*10^13', async () => {
+    await HST.transfer(accounts[1], 240000000000000, {from: accounts[0]})
     const balance = await HST.balanceOf.call(accounts[1])
-    assert.strictEqual(balance.toNumber(), 550000000000000)
+    assert.strictEqual(balance.toNumber(), 240000000000000)
   })
 
   it('transfers: should handle zero-transfers normally', async () => {
@@ -69,7 +69,7 @@ contract('VirtRealToken', function (accounts) {
   // bit overkill. But is for testing a bug
   it('approvals: msg.sender approves accounts[1] of 100 & withdraws 20 once.', async () => {
     const balance0 = await HST.balanceOf.call(accounts[0])
-    assert.strictEqual(balance0.toNumber(), 550000000000000)
+    assert.strictEqual(balance0.toNumber(), 240000000000000)
 
     await HST.approve(accounts[1], 100, {from: accounts[0]}) // 100
     const balance2 = await HST.balanceOf.call(accounts[2])
@@ -85,7 +85,7 @@ contract('VirtRealToken', function (accounts) {
     assert.strictEqual(balance22.toNumber(), 20)
 
     const balance02 = await HST.balanceOf.call(accounts[0])
-    assert.strictEqual(balance02.toNumber(), 549999999999980)
+    assert.strictEqual(balance02.toNumber(), 239999999999980)
   })
 
   // should approve 100 of msg.sender & withdraw 50, twice. (should succeed)
@@ -102,7 +102,7 @@ contract('VirtRealToken', function (accounts) {
     assert.strictEqual(balance2.toNumber(), 20)
 
     const balance0 = await HST.balanceOf.call(accounts[0])
-    assert.strictEqual(balance0.toNumber(), 549999999999980)
+    assert.strictEqual(balance0.toNumber(), 239999999999980)
 
     // FIRST tx done.
     // onto next.
@@ -114,7 +114,7 @@ contract('VirtRealToken', function (accounts) {
     assert.strictEqual(balance22.toNumber(), 40)
 
     const balance02 = await HST.balanceOf.call(accounts[0])
-    assert.strictEqual(balance02.toNumber(), 549999999999960)
+    assert.strictEqual(balance02.toNumber(), 239999999999960)
   })
 
   // should approve 100 of msg.sender & withdraw 50 & 60 (should fail).
@@ -131,7 +131,7 @@ contract('VirtRealToken', function (accounts) {
     assert.strictEqual(balance2.toNumber(), 50)
 
     const balance0 = await HST.balanceOf.call(accounts[0])
-    assert.strictEqual(balance0.toNumber(), 549999999999950)
+    assert.strictEqual(balance0.toNumber(), 239999999999950)
 
     // FIRST tx done.
     // onto next.
@@ -156,10 +156,10 @@ contract('VirtRealToken', function (accounts) {
   })
 
   // should approve max of msg.sender & withdraw 20 without changing allowance (should succeed).
-  // StandardToken.sol has lock on allowance[address] = max
+  // in ConsenSys StandardToken.sol has lock on allowance[address] = max
   it('approvals: msg.sender approves accounts[1] of max (2^256 - 1) & withdraws 20', async () => {
     const balance0 = await HST.balanceOf.call(accounts[0])
-    assert.strictEqual(balance0.toNumber(),550000000000000)
+    assert.strictEqual(balance0.toNumber(),240000000000000)
 
     const max = '1.15792089237316195423570985008687907853269984665640564039457584007913129639935e+77'
     await HST.approve(accounts[1], max, {from: accounts[0]})
@@ -174,7 +174,7 @@ contract('VirtRealToken', function (accounts) {
     assert.strictEqual(balance22.toNumber(), 20)
 
     const balance02 = await HST.balanceOf.call(accounts[0])
-    assert.strictEqual(balance02.toNumber(), 549999999999980)
+    assert.strictEqual(balance02.toNumber(), 239999999999980)
   })
 
   it('events: should fire Transfer event properly', async () => {
